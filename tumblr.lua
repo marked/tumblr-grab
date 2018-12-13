@@ -128,6 +128,7 @@ allowed = function(url, parenturl)
   return false
 end
 
+last_notes_key = nil
 wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_parsed, iri, verdict, reason)
   local url = urlpos["url"]["url"]
   local html = urlpos["link_expect_html"]
@@ -162,6 +163,19 @@ wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_pars
     return true
   end
   
+  
+  if string.match(url,".tumblr.com/notes/[0-9]+/[%a%d]+")  then -- is url in notes key format?
+    local cur_notes_key = string.sub(url,1,string.match(url,'%?'))  -- remove any get params so comparisons can be made
+    if last_notes_key == cur_notes_key or last_notes_key == nil then --
+      -- new notes key
+      last_notes_key = cur_notes_key
+      return true
+    else
+      -- duplicate notes key
+      return false
+    end
+  end
+
   return false
 end
 
