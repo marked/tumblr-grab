@@ -18,8 +18,10 @@ local abortgrab = false
 -- Goal: Get more posts, using epoch minus time in seconds for each month
 local epochtime = 1543953699
 local epochpermonth = 2629743
-local concat = "^https?://".. item_value .. "%.tumblr%.com/?.*/?.*/?.*/?.*/?.*$"
+local concat = "^https?://".. item_value .. "%.tumblr%.com/?[^/]*/?[^/]*/?[^/]*/?[^/]*/?[^/]*$"
 local video = "^https?://www%.tumblr%.com/video/".. item_value .. "/?.*/?.*/?.*"
+
+local discovered_blogs = {}
 
 for ignore in io.open("ignore-list", "r"):lines() do
   downloaded[ignore] = true
@@ -47,14 +49,29 @@ allowed = function(url, parenturl)
   or string.match(url, "^https?://[0-9]+%.media%.tumblr%.com/%p+%d+")
   or string.match(url, "^https?://assets%.tumblr%.com/%p+%d+")
   or string.match(url, "^https?://static%.tumblr%.com/%p+%d+")
-  or string.match(url, "^https?://[0-9]+%.media%.tumblr%.com/avatar_[a-zA-Z0-9]+_64%.pnj")
+  or string.match(url, "^https?://[0-9]+%.media%.tumblr%.com/avatar_[a-zA-Z0-9]+_%d%d%.[pjg][npi][jgf]$")
   or string.match(url, "^https?://[0-9]+%.media%.tumblr%.com/post/")
   or string.match(url, "^https?://assets%.tumblr%.com/archive")
   or string.match(url, "^https?://assets%.tumblr%.com/filter%-by")
   or string.match(url, "^https?://assets%.tumblr%.com/client")
   or string.match(url, "^https?://static%.tumblr%.com/[%u%p%l]+")
-  or string.match(url, "ios%-app://") then
+  or string.match(url, "ios%-app://")
+  or string.match(url, "^https?://" .. item_value .. "%.tumblr%.com/notes")
+  or string.match(url, "^https?://" .. item_value .. "%.tumblr%.com/post/%d+/[^/]+/amp$")
+  or string.match(url, "^https?://" .. item_value .. "%.tumblr%.com/post/%d+/[^/]+/embed$")
+  or string.match(url, "^https?://" .. item_value .. "%.tumblr%.com/rss$")
+  or string.match(url, "^https?://" .. item_value .. "%.tumblr%.com/reblog")
+  or string.match(url, "^https?://" .. item_value .. "%.tumblr%.com/.*%?route=")
+ -- or string.match(url, "^https?://" .. item_value .. "%.tumblr%.com/likes/page/%d%d%d")
+  or string.match(url, "^https?://" .. item_value .. "%.tumblr%.com/[^/]+%%") then
     return false
+  end
+
+  if string.match(url, "^https?://[^%.]+%.tumblr%.com") then
+    local blogname = string.match(url, "^https?://([^%.]+)%.tumblr%.com")
+    if blogname ~= item_value then
+      discovered_blogs[blogname] = true
+    end
   end
   
   if string.match(url, concat) then
@@ -100,9 +117,35 @@ end
 wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_parsed, iri, verdict, reason)
   local url = urlpos["url"]["url"]
   local html = urlpos["link_expect_html"]
+ 
+  if string.find(url, "code%.jquery%.com") then
+    -- Ignore code.jquery.com
+    return false
+  end
+  
+  if string.find(url, "fonts%.googleapis%.com") then
+    -- Ignore fonts.googleapis.com
+    return false
+  end
   
   if string.find(url, "px.srvcs.tumblr.com") then
     -- Ignore px.srvcs.tumblr.com tracking domain
+    return false
+  end
+
+  if string.find(url, "/:year") or 
+    string.find(url, "/:month") or 
+    string.find(url, "/:id") or 
+    string.find(url, "/:page") or 
+    string.find(url, "/:blog_not_found")
+  then 
+    return false
+  end
+
+  if string.match(url, "^https?://www.tumblr.com/oembed/1.0")
+  or string.match(url, "^https?://" .. item_value .. "%.tumblr%.com/post/%d+/[^/]+/embed$")
+  or string.match(url, "^https?://[0-9]+%.media%.tumblr%.com/avatar_[a-zA-Z0-9]+_%d%d%.[pjg][npi][jgf]$") then
+    -- Ignore small avatars (16x16 and 64x64)
     return false
   end
   
@@ -214,7 +257,8 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
       io.stdout:write("\nI give up...\n")
       io.stdout:flush()
       tries = 0
-      if string.match(url["url"], "_%d+.[pjg][npi][ggf]$") then
+      if string.match(url["url"], "_%d+.[pjg][npi][ggf]$")
+      or string.match(url["url"], "%.[pjg][npi][ggf]$") then
         return wget.actions.EXIT
       end
       if allowed(url["url"], nil) then
@@ -233,7 +277,10 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
     or string.match(url["host"], "static%.tumblr%.com")
     or string.match(url["host"], "[a-z0-9]+%.media%.tumblr%.com")
     or string.match(url["host"], "vtt%.tumblr%.com")
-    or string.match(url["host"], "www%.tumblr%.com") then
+    or string.match(url["host"], "www%.tumblr%.com")
+    or string.match(url["host"], "counter%.website%-hit%-counters%.com")
+    or string.match(url["url"], "^https?://".. item_value .."%.tumblr%.com/services")
+    or string.match(url["url"], "%.[pjg][npi][ggf]$") then
       io.stdout:write("Server returned " ..http_stat.statcode.." ("..err.."). Skipping.\n")
       tries = 0
       return wget.actions.EXIT
@@ -266,6 +313,16 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
   end
 
   return wget.actions.NOTHING
+end
+
+wget.callbacks.finish = function(start_time, end_time, wall_time, numurls, total_downloaded_bytes, total_download_time)
+  local file = io.open(item_dir..'/'..warc_file_base..'_data.txt', 'w')
+  if item_type == "tumblr-blog" then
+    for blog, _ in pairs(discovered_blogs) do
+      file:write("tumblr-blog:" .. blog .. "\n")
+    end
+  end
+  file:close()
 end
 
 wget.callbacks.before_exit = function(exit_status, exit_status_string)

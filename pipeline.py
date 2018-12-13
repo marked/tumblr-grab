@@ -58,7 +58,8 @@ if not WGET_LUA:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = '20181208.12'
+
+VERSION = '20181213.03'
 USER_AGENT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html; ArchiveTeam)'
 TRACKER_ID = 'tumblr'
 TRACKER_HOST = 'tracker.archiveteam.org'
@@ -123,6 +124,7 @@ class PrepareDirectories(SimpleTask):
             time.strftime('%Y%m%d-%H%M%S'))
 
         open('%(item_dir)s/%(warc_file_base)s.warc.gz' % item, 'w').close()
+        open('%(item_dir)s/%(warc_file_base)s_data.txt' % item, 'w').close()
 
 
 class MoveFiles(SimpleTask):
@@ -136,6 +138,8 @@ class MoveFiles(SimpleTask):
 
         os.rename('%(item_dir)s/%(warc_file_base)s.warc.gz' % item,
               '%(data_dir)s/%(warc_file_base)s.warc.gz' % item)
+        os.rename('%(item_dir)s/%(warc_file_base)s_data.txt' % item,
+              '%(data_dir)s/%(warc_file_base)s_data.txt' % item)
 
         shutil.rmtree('%(item_dir)s' % item)
 
@@ -218,10 +222,10 @@ class WgetArgs(object):
 # This will be shown in the warrior management panel. The logo should not
 # be too big. The deadline is optional.
 project = Project(
-    title = 'tumbledown',
+    title = 'Tumblr',
     project_html = '''
     <img class="project-logo" alt="logo" src="https://archiveteam.org/images/b/ba/Tumblr_on_white.png" height="50px"/>
-    <h2>Tumblr <span class="links"><a href="http://www.tumblr.com/">Website</a> &middot; <a href="http://tracker.archiveteam.org/tumbledown/">Leaderboard</a></span></h2>
+    <h2>Tumblr <span class="links"><a href="http://www.tumblr.com/">Website</a> &middot; <a href="http://tracker.archiveteam.org/tumblr/">Leaderboard</a></span></h2>
     '''
 )
 
@@ -259,6 +263,7 @@ pipeline = Pipeline(
             downloader=downloader,
             version=VERSION,
             files=[
+                ItemInterpolation('%(data_dir)s/%(warc_file_base)s_data.txt'),
                 ItemInterpolation('%(data_dir)s/%(warc_file_base)s.warc.gz')
             ],
             rsync_target_source_path=ItemInterpolation('%(data_dir)s/'),
