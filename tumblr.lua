@@ -161,6 +161,15 @@ wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_pars
     addedtolist[url] = true
     return true
   end
+
+  local ctime = url:match(".tumblr.com/notes/[0-9]+/[%a%d]+%?from_c=([0-9]+)")  then -- is url in notes key format with param?
+  if ctime
+  then
+    if tonumber(ctime) % 100 < 5
+    else
+        return false
+     end
+  end
   
   return false
 end
