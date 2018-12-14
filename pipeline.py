@@ -191,6 +191,10 @@ class WgetArgs(object):
             '--warc-header', ItemInterpolation('tumblr-blog: %(item_name)s')
         ]
 
+        debug = 1
+        if debug:
+          print(wget_args)
+        
         item_name = item['item_name']
         assert ':' in item_name
         item_type, item_value = item_name.split(':', 1)
