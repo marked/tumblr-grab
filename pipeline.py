@@ -62,8 +62,8 @@ if not WGET_LUA:
 VERSION = '20181213.04'
 USER_AGENT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html; ArchiveTeam)'
 TRACKER_ID = 'tumblr'
-TRACKER_HOST = 'tracker.archiveteam.org'
-
+#TRACKER_HOST = 'tracker.archiveteam.org'  #dev
+TRACKER_HOST = 'server5.kiska.pw:9080'    #test
 
 ###########################################################################
 # This section defines project-specific tasks.
