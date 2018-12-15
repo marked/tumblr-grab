@@ -266,7 +266,11 @@ class CheckForLogin(Task):
             if location.startswith(self.blog_url(item, scheme='https')):
                 self.fetch_page(item, scheme='https')
                 return
+            elif location.startswith('https://www.tumblr.com/login_required/'):
+                item['tumblr_requires_login'] = True
             elif location.startswith('https://www.tumblr.com/safe-mode'):
+                item['tumblr_requires_login'] = True
+            elif location.startswith('https://www.tumblr.com/privacy/consent?redirect='):
                 item['tumblr_requires_login'] = True
 
         self.complete_item(item)
