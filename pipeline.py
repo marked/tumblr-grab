@@ -173,7 +173,7 @@ class WgetArgs(object):
             item.log_output('Using Bot_UA')  # login-required tests need to be done with that
         else:
             user_agent = BROWSER_UA
-            item.log_output('Using Broswer_UA')
+            item.log_output('Using Browser_UA')
 
 
         wget_args = [
