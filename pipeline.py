@@ -168,7 +168,7 @@ def stats_id_function(item):
 
 class WgetArgs(object):
     def realize(self, item):
-        if item['tumblr_requires_login']:
+        if item['tumblr_requires_login' or 'tumblr_requires_gpdr']:
             user_agent = USER_AGENT
         else:
             user_agent = BROWSER_UA
@@ -260,6 +260,7 @@ class CheckForLogin(Task):
 
     def handle_response(self, item, response):
         item['tumblr_requires_login'] = False
+        item['tumblr_requires_gpdr'] = False
         if response.code == 302:
             location = response.headers['Location']
             # follow the http -> https redirect for pages that require login
@@ -271,7 +272,7 @@ class CheckForLogin(Task):
             elif location.startswith('https://www.tumblr.com/safe-mode'):
                 item['tumblr_requires_login'] = True
             elif location.startswith('https://www.tumblr.com/privacy/consent?redirect='):
-                item['tumblr_requires_login'] = True
+                item['tumblr_requires_gpdr'] = True
 
         self.complete_item(item)
 
