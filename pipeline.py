@@ -63,7 +63,7 @@ if not WGET_LUA:
 # It will be added to the WARC files and reported to the tracker.
 
 VERSION = '20181213.04'
-USER_AGENT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html; ArchiveTeam)'
+BOT_UA     = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html; ArchiveTeam)'
 BROWSER_UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
 TRACKER_ID = 'tumblr'
 TRACKER_HOST = 'tracker.archiveteam.org'
@@ -169,7 +169,7 @@ def stats_id_function(item):
 class WgetArgs(object):
     def realize(self, item):
         if item['tumblr_requires_login' or 'tumblr_requires_gpdr']:
-            user_agent = USER_AGENT
+            user_agent = BOT_UA
         else:
             user_agent = BROWSER_UA
 
