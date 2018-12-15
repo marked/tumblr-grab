@@ -169,10 +169,12 @@ def stats_id_function(item):
 class WgetArgs(object):
     def realize(self, item):
         if item['tumblr_requires_login' or 'tumblr_requires_gpdr']:
-            user_agent = BOT_UA  # Warning: if we change our GDPR strategy to using a GDPR cookie with browser UA, 
-                                 # login-required tests need to be done with that
+            user_agent = BOT_UA        # Warning: if we change our GDPR strategy to using a GDPR cookie with browser UA, 
+            item.log_output('Using Bot_UA')  # login-required tests need to be done with that
         else:
             user_agent = BROWSER_UA
+            item.log_output('Using Broswer_UA')
+
 
         wget_args = [
             WGET_LUA,
@@ -270,10 +272,13 @@ class CheckForLogin(Task):
                 return
             elif location.startswith('https://www.tumblr.com/login_required/'):
                 item['tumblr_requires_login'] = True
+                item.log_output('Detected https://www.tumblr.com/login_required/')
             elif location.startswith('https://www.tumblr.com/safe-mode'):
                 item['tumblr_requires_login'] = True
+                item.log_output('Detected https://www.tumblr.com/safe-mode')
             elif location.startswith('https://www.tumblr.com/privacy/consent?redirect='):
                 item['tumblr_requires_gpdr'] = True
+                item.log_output('Detected https://www.tumblr.com/privacy/consent?redirect=')
 
         self.complete_item(item)
 
