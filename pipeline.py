@@ -63,7 +63,7 @@ if not WGET_LUA:
 # It will be added to the WARC files and reported to the tracker.
 
 VERSION = '20181213.04'
-BOT_UA     = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html; ArchiveTeam)'
+BOT_UA     = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
 BROWSER_UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
 TRACKER_ID = 'tumblr'
 TRACKER_HOST = 'tracker.archiveteam.org'
