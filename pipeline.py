@@ -285,7 +285,7 @@ class CheckForLogin(Task):
     @staticmethod
     def blog_url(item, scheme='http'):
         host = item['item_name'].split(':')[1]
-        return "{}://{}".format(scheme, host)
+        return "{}://{}.tumblr.com".format(scheme, host)
 
 pipeline = Pipeline(
     CheckIP(),
