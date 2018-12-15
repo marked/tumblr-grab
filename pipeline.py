@@ -168,7 +168,7 @@ def stats_id_function(item):
 
 class WgetArgs(object):
     def realize(self, item):
-        if item['tumblr_requires_login' or 'tumblr_requires_gdpr']:
+        if item['tumblr_requires_login'] or item['tumblr_requires_gdpr']:
             user_agent = BOT_UA        # Warning: if we change our GDPR strategy to using a GDPR cookie with browser UA, 
             item.log_output('Using Bot_UA')  # login-required tests need to be done with that
         else:
