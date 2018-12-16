@@ -168,7 +168,7 @@ def stats_id_function(item):
 
 class WgetArgs(object):
     def realize(self, item):
-        if item['tumblr_requires_login' or 'tumblr_requires_gpdr']:
+        if item['tumblr_requires_login'] or item['tumblr_requires_gdpr']:
             user_agent = BOT_UA        # Warning: if we change our GDPR strategy to using a GDPR cookie with browser UA, 
             item.log_output('Using Bot_UA')  # login-required tests need to be done with that
         else:
@@ -263,7 +263,7 @@ class CheckForLogin(Task):
 
     def handle_response(self, item, response):
         item['tumblr_requires_login'] = False
-        item['tumblr_requires_gpdr'] = False
+        item['tumblr_requires_gdpr'] = False
         if response.code == 302:
             location = response.headers['Location']
             # follow the http -> https redirect for pages that require login
@@ -277,7 +277,7 @@ class CheckForLogin(Task):
                 item['tumblr_requires_login'] = True
                 item.log_output('Detected https://www.tumblr.com/safe-mode')
             elif location.startswith('https://www.tumblr.com/privacy/consent?redirect='):
-                item['tumblr_requires_gpdr'] = True
+                item['tumblr_requires_gdpr'] = True
                 item.log_output('Detected https://www.tumblr.com/privacy/consent?redirect=')
 
         self.complete_item(item)
@@ -285,7 +285,7 @@ class CheckForLogin(Task):
     @staticmethod
     def blog_url(item, scheme='http'):
         host = item['item_name'].split(':')[1]
-        return "{}://{}".format(scheme, host)
+        return "{}://{}.tumblr.com".format(scheme, host)
 
 pipeline = Pipeline(
     CheckIP(),
