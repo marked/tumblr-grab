@@ -207,6 +207,8 @@ class WgetArgs(object):
             '--warc-header', ItemInterpolation('tumblr-blog: %(item_name)s')
         ]
         
+        print wget_args
+ 
         
         if item_type == 'tumblr-blog':
             split_items = item_value.split(':')
