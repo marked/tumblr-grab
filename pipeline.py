@@ -173,6 +173,14 @@ class WgetArgs(object):
     def realize(self, item):
         shuffle(COOKIES)
         COOKIE = COOKIES[0]
+
+        item_name = item['item_name']
+        assert ':' in item_name
+        item_type, item_value = item_name.split(':', 1)
+
+        item['item_type'] = item_type
+        item['item_value'] = item_value
+        
         wget_args = [
             WGET_LUA,
             '-U', COOKIE['uax'],
@@ -198,18 +206,16 @@ class WgetArgs(object):
             '--warc-header', 'tumblr-dld-script-version: ' + VERSION,
             '--warc-header', ItemInterpolation('tumblr-blog: %(item_name)s')
         ]
-
-        item_name = item['item_name']
-        assert ':' in item_name
-        item_type, item_value = item_name.split(':', 1)
-
-        item['item_type'] = item_type
-        item['item_value'] = item_value
-
+        
+        
         if item_type == 'tumblr-blog':
             split_items = item_value.split(':')
             for x in split_items:
+                print wget_args
+                
                 wget_args.extend(['--warc-header', 'tumblr-blog: ' + x])
+                print wget_args
+                
                 wget_args.append('http://{}.tumblr.com/'.format(x))
                 wget_args.append('http://{}.tumblr.com/sitemap.xml'.format(x))
         else:
